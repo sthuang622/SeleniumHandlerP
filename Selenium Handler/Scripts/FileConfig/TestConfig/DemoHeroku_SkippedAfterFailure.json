@@ -1,0 +1,11 @@
+{
+  "name": "Demo Heroku - Skipped After Failed Dependency",
+  "description": "This test depends on the missing-element failure test. It should be skipped/not run when that dependency fails, demonstrating test-level dependency behavior.",
+  "testSteps": [
+    {
+      "name": "This step should not run",
+      "description": "If this step runs, the test dependency did not skip correctly.",
+      "seleniumScript": "DemoHeroku_ShouldNotRunBecauseDependencyFailed.cs"
+    }
+  ]
+}

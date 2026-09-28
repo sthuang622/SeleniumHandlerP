@@ -1,0 +1,34 @@
+{
+  "name": "Demo Heroku - Add Remove Elements",
+  "description": "Add multiple dynamic buttons, verify the count, delete one, and verify the remaining count.",
+  "testSteps": [
+    {
+      "name": "Open add remove page",
+      "description": "Navigate to the public add/remove elements page.",
+      "seleniumScript": "DemoHeroku_OpenAddRemovePage.cs"
+    },
+    {
+      "name": "Add demo elements",
+      "description": "Click Add Element {addElementCount} times and store the expected count.",
+      "seleniumScript": "DemoHeroku_AddDemoElements.cs"
+    },
+    {
+      "name": "Verify added element count",
+      "description": "Verify the number of delete buttons matches the stored expected count.",
+      "seleniumScript": "DemoHeroku_VerifyAddedElementCount.cs",
+      "dependency": "Add demo elements"
+    },
+    {
+      "name": "Delete one element",
+      "description": "Delete one dynamic element and update expected count.",
+      "seleniumScript": "DemoHeroku_DeleteOneElement.cs",
+      "dependency": "Verify added element count"
+    },
+    {
+      "name": "Verify remaining element count",
+      "description": "Verify one fewer dynamic element remains.",
+      "seleniumScript": "DemoHeroku_VerifyAddedElementCount.cs",
+      "dependency": "Delete one element"
+    }
+  ]
+}

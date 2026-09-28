@@ -1,0 +1,27 @@
+{
+  "name": "Demo Heroku - Intentional Failure Example",
+  "description": "This test is intentionally designed to fail so the report clearly demonstrates failed test styling, screenshots, and error messages.",
+  "testSteps": [
+    {
+      "name": "Open login page",
+      "description": "Navigate to the public login demo page.",
+      "seleniumScript": "DemoHeroku_OpenLoginPage.cs"
+    },
+    {
+      "name": "Enter invalid credentials",
+      "description": "Enter invalid credentials on purpose.",
+      "seleniumScript": "DemoHeroku_EnterInvalidCredentials.cs"
+    },
+    {
+      "name": "Submit invalid login",
+      "description": "Submit the invalid login form.",
+      "seleniumScript": "DemoHeroku_SubmitLogin.cs"
+    },
+    {
+      "name": "Intentional failure - expect secure page",
+      "description": "This step intentionally expects the secure page after invalid credentials. It should fail and show a clear demo error.",
+      "seleniumScript": "DemoHeroku_IntentionalFailureExpectSecureAfterInvalidLogin.cs",
+      "dependency": "Submit invalid login"
+    }
+  ]
+}

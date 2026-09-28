@@ -1,0 +1,28 @@
+{
+  "name": "Demo Heroku - Checkboxes",
+  "description": "Open the checkbox page, capture initial state, toggle a checkbox, and verify the changed state.",
+  "testSteps": [
+    {
+      "name": "Open checkboxes page",
+      "description": "Navigate to the public checkbox demo page.",
+      "seleniumScript": "DemoHeroku_OpenCheckboxesPage.cs"
+    },
+    {
+      "name": "Read checkbox state",
+      "description": "Store the first checkbox initial selected state in runtime params.",
+      "seleniumScript": "DemoHeroku_ReadFirstCheckboxState.cs"
+    },
+    {
+      "name": "Toggle first checkbox",
+      "description": "Click the first checkbox.",
+      "seleniumScript": "DemoHeroku_ToggleFirstCheckbox.cs",
+      "dependency": "Read checkbox state"
+    },
+    {
+      "name": "Verify checkbox toggled",
+      "description": "Verify the first checkbox selected state is different from the stored state.",
+      "seleniumScript": "DemoHeroku_VerifyFirstCheckboxToggled.cs",
+      "dependency": "Toggle first checkbox"
+    }
+  ]
+}

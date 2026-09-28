@@ -1,0 +1,34 @@
+{
+  "name": "Demo Heroku - Dynamic Controls",
+  "description": "Remove and re-add a dynamic checkbox while demonstrating step dependencies.",
+  "testSteps": [
+    {
+      "name": "Open dynamic controls page",
+      "description": "Navigate to the public dynamic controls demo page.",
+      "seleniumScript": "DemoHeroku_OpenDynamicControlsPage.cs"
+    },
+    {
+      "name": "Remove checkbox",
+      "description": "Click Remove and wait for the checkbox to disappear.",
+      "seleniumScript": "DemoHeroku_RemoveDynamicCheckbox.cs"
+    },
+    {
+      "name": "Verify checkbox removed",
+      "description": "Verify the checkbox is gone and the page reports completion.",
+      "seleniumScript": "DemoHeroku_VerifyDynamicCheckboxRemoved.cs",
+      "dependency": "Remove checkbox"
+    },
+    {
+      "name": "Add checkbox back",
+      "description": "Click Add and wait for the checkbox to return.",
+      "seleniumScript": "DemoHeroku_AddDynamicCheckbox.cs",
+      "dependency": "Verify checkbox removed"
+    },
+    {
+      "name": "Verify checkbox returned",
+      "description": "Verify the checkbox is visible again.",
+      "seleniumScript": "DemoHeroku_VerifyDynamicCheckboxReturned.cs",
+      "dependency": "Add checkbox back"
+    }
+  ]
+}

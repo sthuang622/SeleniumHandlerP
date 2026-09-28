@@ -1,0 +1,26 @@
+{
+  "name": "Demo Heroku - Login Success",
+  "description": "Log in with valid public demo credentials and verify the secure area is shown.",
+  "testSteps": [
+    {
+      "name": "Open login page",
+      "description": "Navigate to the public login demo page.",
+      "seleniumScript": "DemoHeroku_OpenLoginPage.cs"
+    },
+    {
+      "name": "Enter valid credentials",
+      "description": "Enter username {validUsername} and the configured password.",
+      "seleniumScript": "DemoHeroku_EnterValidCredentials.cs"
+    },
+    {
+      "name": "Submit login",
+      "description": "Submit the login form.",
+      "seleniumScript": "DemoHeroku_SubmitLogin.cs"
+    },
+    {
+      "name": "Verify secure area",
+      "description": "Verify secure area loaded and store login status in runtime params.",
+      "seleniumScript": "DemoHeroku_VerifySecureArea.cs"
+    }
+  ]
+}

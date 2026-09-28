@@ -1,0 +1,16 @@
+{
+  "name": "Demo Heroku - Failure: Syntax Error",
+  "description": "This test intentionally runs a C# selenium script with invalid syntax to demonstrate script compilation failure reporting.",
+  "testSteps": [
+    {
+      "name": "Open login page",
+      "description": "Navigate to the public login demo page before running the broken script.",
+      "seleniumScript": "DemoHeroku_OpenLoginPage.cs"
+    },
+    {
+      "name": "Intentional syntax error",
+      "description": "Run a script that contains an intentional C# syntax error. This step should fail during script compilation.",
+      "seleniumScript": "DemoHeroku_Failure_SyntaxError.cs"
+    }
+  ]
+}

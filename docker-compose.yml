@@ -1,0 +1,33 @@
+services:
+  seleniumhandler-sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: seleniumhandler-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Your_strong_P@ssw0rd_123}"
+    ports:
+      - "1599:1433"
+    volumes:
+      - seleniumhandler-sqlserver-data:/var/opt/mssql
+
+  seleniumhandler-sqlserver-init:
+    image: mcr.microsoft.com/mssql-tools
+    container_name: seleniumhandler-sqlserver-init
+    depends_on:
+      - seleniumhandler-sqlserver
+    environment:
+      MSSQL_SA_PASSWORD: "${MSSQL_SA_PASSWORD:-Your_strong_P@ssw0rd_123}"
+    volumes:
+      - ./docker/mssql/01-init-seleniumhandlerdocker.sql:/init/01-init-seleniumhandlerdocker.sql:ro
+    entrypoint:
+      - /bin/bash
+      - -c
+      - |
+        until /opt/mssql-tools/bin/sqlcmd -S seleniumhandler-sqlserver -U sa -P "$$MSSQL_SA_PASSWORD" -Q "SELECT 1" -b; do
+          sleep 2
+        done
+        /opt/mssql-tools/bin/sqlcmd -S seleniumhandler-sqlserver -U sa -P "$$MSSQL_SA_PASSWORD" -i /init/01-init-seleniumhandlerdocker.sql -b
+    restart: "no"
+
+volumes:
+  seleniumhandler-sqlserver-data:

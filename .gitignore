@@ -1,0 +1,17 @@
+# Visual Studio / local IDE files
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/
+.codex-build/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Local screenshots/results can be large and machine-specific
+Selenium Handler/Scripts/Screenshots/
+Selenium Handler/Scripts/Results/

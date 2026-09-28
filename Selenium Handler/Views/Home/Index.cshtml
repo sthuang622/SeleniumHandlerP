@@ -1,0 +1,88 @@
+@{
+    ViewData["Title"] = "Selenium Handler";
+}
+
+<div class="selenium-page">
+    <section class="page-header">
+        <div>
+            <p class="eyebrow">Automation runner</p>
+            <h1>Selenium Handler</h1>
+            <p class="header-copy">Run one or more file configs. Each config opens its own browser, runs its Selenium steps in order, then closes the browser before the next test starts.</p>
+        </div>
+        <div class="header-actions">
+            <button type="button" class="btn btn-outline-secondary" id="refreshResultsButton">Refresh Results</button>
+            <button type="button" class="btn btn-primary" id="downloadResultsButton">Download Checked Results</button>
+        </div>
+    </section>
+
+    <div class="work-grid">
+        <section class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Run Tests</h2>
+                    <p>Enter config names or paths, one per line.</p>
+                </div>
+            </div>
+
+            <form id="runTestsForm">
+                <label class="form-label" for="fileConfigs">File configs</label>
+                <textarea class="form-control config-input" id="fileConfigs" rows="8" placeholder="CreateCase.json&#10;LoginFlow.json"></textarea>
+
+                <div class="actions">
+                    <button type="submit" class="btn btn-primary" id="runTestsButton">Run Tests</button>
+                    <button type="button" class="btn btn-outline-primary" id="listTestsButton">List Tests</button>
+                    <button type="button" class="btn btn-outline-secondary" id="clearConfigsButton">Clear</button>
+                </div>
+            </form>
+
+            <div class="status-box" id="runStatus" hidden></div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-heading">
+                <div>
+                    <h2>Recent Results</h2>
+                    <p>Saved test and step results from SQL Server.</p>
+                </div>
+                <input class="form-control date-input" type="date" id="resultsStartDate" />
+            </div>
+
+            <div class="results-list" id="resultsList">
+                <div class="empty-state">No results loaded yet.</div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<div class="modal fade" id="testListModal" tabindex="-1" aria-labelledby="testListModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="testListModalLabel">Select Tests</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="test-list-status" id="testListStatus">Loading tests...</div>
+                <div class="test-list-options" id="testListOptions"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" id="submitTestListButton">Submit</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="screenshotModal" tabindex="-1" aria-labelledby="screenshotModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title fs-5" id="screenshotModalLabel">Screenshot</h2>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body screenshot-modal-body">
+                <img id="screenshotModalImage" class="screenshot-modal-image" alt="Screenshot preview" />
+            </div>
+        </div>
+    </div>
+</div>

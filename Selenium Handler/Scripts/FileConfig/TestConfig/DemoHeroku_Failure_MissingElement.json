@@ -1,0 +1,16 @@
+{
+  "name": "Demo Heroku - Failure: Missing Element",
+  "description": "This test intentionally looks for an element that does not exist to demonstrate missing-element failure reporting.",
+  "testSteps": [
+    {
+      "name": "Open login page",
+      "description": "Navigate to the public login demo page.",
+      "seleniumScript": "DemoHeroku_OpenLoginPage.cs"
+    },
+    {
+      "name": "Find missing element",
+      "description": "Look for selector {missingSelector}. This selector is intentionally missing and should fail.",
+      "seleniumScript": "DemoHeroku_Failure_MissingElement.cs"
+    }
+  ]
+}

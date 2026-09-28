@@ -1,0 +1,36 @@
+@{
+    ViewData["Title"] = "Selenium Test Page";
+}
+
+<div class="test-page">
+    <section class="test-panel">
+        <h1>Selenium Test Page</h1>
+
+        <div class="test-form">
+            <label class="form-label" for="numberInput">Number input</label>
+            <input class="form-control" id="numberInput" type="number" />
+
+            <label class="form-label" for="textInput">Text input</label>
+            <input class="form-control" id="textInput" type="text" />
+
+            <div class="actions">
+                <button class="btn btn-primary" id="saveButton" type="button">Save</button>
+                <button class="btn btn-danger" id="failButton" type="button">Fail</button>
+            </div>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        document.getElementById("saveButton").addEventListener("click", () => {
+            window.setTimeout(() => {
+                window.alert("finished");
+            }, 3000);
+        });
+
+        document.getElementById("failButton").addEventListener("click", () => {
+            window.alert("failed");
+        });
+    </script>
+}

@@ -1,0 +1,26 @@
+{
+  "name": "Demo Heroku - Login Failure",
+  "description": "Try invalid credentials and verify the expected error message appears.",
+  "testSteps": [
+    {
+      "name": "Open login page",
+      "description": "Navigate to the public login demo page.",
+      "seleniumScript": "DemoHeroku_OpenLoginPage.cs"
+    },
+    {
+      "name": "Enter invalid credentials",
+      "description": "Enter username {invalidUsername} and an invalid password.",
+      "seleniumScript": "DemoHeroku_EnterInvalidCredentials.cs"
+    },
+    {
+      "name": "Submit login",
+      "description": "Submit the login form.",
+      "seleniumScript": "DemoHeroku_SubmitLogin.cs"
+    },
+    {
+      "name": "Verify login error",
+      "description": "Verify the login failure message is shown.",
+      "seleniumScript": "DemoHeroku_VerifyLoginError.cs"
+    }
+  ]
+}

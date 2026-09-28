@@ -1,0 +1,16 @@
+{
+  "name": "Demo Heroku - Failure: Wrong Text Assertion",
+  "description": "This test intentionally expects the wrong page text to demonstrate assertion failure reporting.",
+  "testSteps": [
+    {
+      "name": "Open dropdown page",
+      "description": "Navigate to the public dropdown demo page.",
+      "seleniumScript": "DemoHeroku_OpenDropdownPage.cs"
+    },
+    {
+      "name": "Expect wrong text",
+      "description": "Assert the page contains {wrongExpectedText}. This text is intentionally wrong and should fail.",
+      "seleniumScript": "DemoHeroku_Failure_WrongText.cs"
+    }
+  ]
+}
