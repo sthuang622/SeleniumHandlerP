@@ -89,8 +89,6 @@ namespace Selenium_Handler.Handler.Implementation {
                     var testRuns = CreatePendingTestRuns(fileConfig.Tests, configPath, fileConfigResult.Id, fileConfig.Name, fileConfig.Api);
                     var testOutcomes = new Dictionary<string, TestConfigOutcome>(StringComparer.OrdinalIgnoreCase);
 
-                    EnsureBrowser();
-
                     foreach (var testRun in testRuns) {
                         var testName = GetTestConfigName(testRun.ConfigPath, testRun.Config);
 
@@ -122,7 +120,6 @@ namespace Selenium_Handler.Handler.Implementation {
 
                 var testResult = CreatePendingTestResult(configPath, testConfig, fileConfigResultId, 1);
 
-                EnsureBrowser();
                 RunExecutableConfig(configPath, testConfig, testResult);
             }
             finally {
@@ -208,7 +205,7 @@ namespace Selenium_Handler.Handler.Implementation {
             var ownsDriver = _driver is null;
 
             if (ownsDriver) {
-                _driver = CreateDriver();
+                _driver = CreateDriver(_currentConfig);
             }
 
             try {
@@ -228,7 +225,7 @@ namespace Selenium_Handler.Handler.Implementation {
                     _sharedData);
 
                 var result = CSharpScript
-                    .EvaluateAsync<object?>(executableCode, BuildScriptOptions(scriptPath), globals)
+                    .EvaluateAsync<object?>(executableCode, BuildScriptOptions(scriptPath, _currentConfig), globals)
                     .GetAwaiter()
                     .GetResult();
 
@@ -381,17 +378,52 @@ namespace Selenium_Handler.Handler.Implementation {
             }
         }
 
-        private IWebDriver CreateDriver() {
+        private IWebDriver CreateDriver(TestConfig? testConfig) {
             var options = new ChromeOptions();
-            options.AddUserProfilePreference("credentials_enable_service", false);
-            options.AddUserProfilePreference("profile.password_manager_enabled", false);
-            options.AddUserProfilePreference("profile.password_manager_leak_detection", false);
-            options.AddUserProfilePreference("password_manager_leak_detection", false);
-            options.AddUserProfilePreference("safebrowsing.enabled", false);
-            options.AddArgument("--disable-save-password-bubble");
-            options.AddArgument("--disable-notifications");
-            options.AddArgument("--disable-features=PasswordLeakDetection,PasswordManagerOnboarding,AutofillServerCommunication");
+            var chromeDriver = testConfig?.ChromeDriver;
+
+            if (chromeDriver is not null) {
+                foreach (var preference in chromeDriver.UserProfilePreferences) {
+                    if (string.IsNullOrWhiteSpace(preference.Key)) {
+                        continue;
+                    }
+
+                    var preferenceValue = NormalizeChromeOptionValue(preference.Value);
+
+                    if (preferenceValue is null) {
+                        continue;
+                    }
+
+                    options.AddUserProfilePreference(preference.Key, preferenceValue);
+                }
+
+                foreach (var argument in chromeDriver.Arguments) {
+                    if (string.IsNullOrWhiteSpace(argument)) {
+                        continue;
+                    }
+
+                    options.AddArgument(argument);
+                }
+            }
+
             return new ChromeDriver(options);
+        }
+
+        private static object? NormalizeChromeOptionValue(object? value) {
+            if (value is JsonElement jsonElement) {
+                return jsonElement.ValueKind switch {
+                    JsonValueKind.True => true,
+                    JsonValueKind.False => false,
+                    JsonValueKind.Number when jsonElement.TryGetInt32(out var intValue) => intValue,
+                    JsonValueKind.Number when jsonElement.TryGetInt64(out var longValue) => longValue,
+                    JsonValueKind.Number when jsonElement.TryGetDouble(out var doubleValue) => doubleValue,
+                    JsonValueKind.String => jsonElement.GetString(),
+                    JsonValueKind.Null => null,
+                    _ => jsonElement.ToString()
+                };
+            }
+
+            return value;
         }
 
         private void EnsureBrowser() {
@@ -399,7 +431,7 @@ namespace Selenium_Handler.Handler.Implementation {
                 return;
             }
 
-            _driver = CreateDriver();
+            _driver = CreateDriver(_currentConfig);
         }
 
 
@@ -681,25 +713,42 @@ namespace Selenium_Handler.Handler.Implementation {
                 : code;
         }
 
-        private static ScriptOptions BuildScriptOptions(string scriptPath) {
+        private static ScriptOptions BuildScriptOptions(string scriptPath, TestConfig? testConfig) {
+            var configuredOptions = testConfig?.ScriptOptions;
+            var referenceAssemblies = GetScriptReferenceAssemblies(configuredOptions?.References);
+            var imports = configuredOptions?.Imports?
+                .Where(importName => !string.IsNullOrWhiteSpace(importName))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToArray() ?? Array.Empty<string>();
+
             return ScriptOptions.Default
                 .WithFilePath(scriptPath)
-                .WithReferences(
-                    typeof(object).Assembly,
-                    typeof(Enumerable).Assembly,
-                    typeof(IWebDriver).Assembly,
-                    typeof(ChromeDriver).Assembly,
-                    typeof(WebDriverWait).Assembly,
-                    typeof(TestConfig).Assembly)
-                .WithImports(
-                    "System",
-                    "System.Collections.Generic",
-                    "System.Linq",
-                    "System.Threading",
-                    "OpenQA.Selenium",
-                    "OpenQA.Selenium.Chrome",
-                    "OpenQA.Selenium.Support.UI",
-                    "Selenium_Handler.Vo");
+                .WithReferences(referenceAssemblies)
+                .WithImports(imports);
+        }
+
+        private static IEnumerable<System.Reflection.Assembly> GetScriptReferenceAssemblies(IEnumerable<string>? references) {
+            foreach (var reference in references ?? Enumerable.Empty<string>()) {
+                if (string.IsNullOrWhiteSpace(reference)) {
+                    continue;
+                }
+
+                yield return ResolveScriptReferenceAssembly(reference);
+            }
+        }
+
+        private static System.Reflection.Assembly ResolveScriptReferenceAssembly(string reference) {
+            return reference.Trim() switch {
+                "object" or "System.Object" => typeof(object).Assembly,
+                "Enumerable" or "System.Linq.Enumerable" => typeof(Enumerable).Assembly,
+                "IWebDriver" or "OpenQA.Selenium.IWebDriver" => typeof(IWebDriver).Assembly,
+                "ChromeDriver" or "OpenQA.Selenium.Chrome.ChromeDriver" => typeof(ChromeDriver).Assembly,
+                "WebDriverWait" or "OpenQA.Selenium.Support.UI.WebDriverWait" => typeof(WebDriverWait).Assembly,
+                "TestConfig" or "Selenium_Handler.Vo.TestConfig" => typeof(TestConfig).Assembly,
+                _ => AppDomain.CurrentDomain.GetAssemblies()
+                    .FirstOrDefault(assembly => string.Equals(assembly.GetName().Name, reference, StringComparison.OrdinalIgnoreCase))
+                    ?? throw new InvalidOperationException($"Script reference '{reference}' could not be resolved. Use a supported type alias or a loaded assembly name.")
+            };
         }
 
         private string? TakeScreenshot(string stepName, string resultSuffix) {
@@ -750,6 +799,8 @@ namespace Selenium_Handler.Handler.Implementation {
         }
     }
 }
+
+
 
 
 
