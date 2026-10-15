@@ -12,5 +12,39 @@
       "description": "Assert the page contains {wrongExpectedText}. This text is intentionally wrong and should fail.",
       "seleniumScript": "DemoHeroku_Failure_WrongText.cs"
     }
-  ]
+  ],
+  "chromeDriver": {
+    "userProfilePreferences": {
+      "credentials_enable_service": false,
+      "profile.password_manager_enabled": false,
+      "profile.password_manager_leak_detection": false,
+      "password_manager_leak_detection": false,
+      "safebrowsing.enabled": false
+    },
+    "arguments": [
+      "--disable-save-password-bubble",
+      "--disable-notifications",
+      "--disable-features=PasswordLeakDetection,PasswordManagerOnboarding,AutofillServerCommunication"
+    ]
+  },
+  "scriptOptions": {
+    "references": [
+      "object",
+      "Enumerable",
+      "IWebDriver",
+      "ChromeDriver",
+      "WebDriverWait",
+      "TestConfig"
+    ],
+    "imports": [
+      "System",
+      "System.Collections.Generic",
+      "System.Linq",
+      "System.Threading",
+      "OpenQA.Selenium",
+      "OpenQA.Selenium.Chrome",
+      "OpenQA.Selenium.Support.UI",
+      "Selenium_Handler.Vo"
+    ]
+  }
 }
