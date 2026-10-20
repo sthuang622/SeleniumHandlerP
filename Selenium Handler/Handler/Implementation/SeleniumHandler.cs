@@ -21,6 +21,7 @@ namespace Selenium_Handler.Handler.Implementation {
         private readonly ITestResultRepo _testResultRepo;
         private readonly Dictionary<string, object?> _sharedData = new(StringComparer.OrdinalIgnoreCase);
         private IWebDriver? _driver;
+        private SeleniumBrowserConfig? _browserConfig;
         private TestConfig? _currentConfig;
         private TestStep? _currentStep;
 
@@ -79,6 +80,7 @@ namespace Selenium_Handler.Handler.Implementation {
 
             try {
                 var fileConfig = LoadConfig(configPath);
+                _browserConfig = fileConfig.Browser;
 
                 if (fileConfig.Tests.Count > 0) {
                     ValidateWrapperConfig(fileConfig);
@@ -197,6 +199,7 @@ namespace Selenium_Handler.Handler.Implementation {
         public void ResetSession() {
             _currentStep = null;
             _currentConfig = null;
+            _browserConfig = null;
             _sharedData.Clear();
             CloseBrowser();
         }
@@ -205,7 +208,7 @@ namespace Selenium_Handler.Handler.Implementation {
             var ownsDriver = _driver is null;
 
             if (ownsDriver) {
-                _driver = CreateDriver(_currentConfig);
+                _driver = CreateDriver();
             }
 
             try {
@@ -378,12 +381,13 @@ namespace Selenium_Handler.Handler.Implementation {
             }
         }
 
-        private IWebDriver CreateDriver(TestConfig? testConfig) {
-            var options = new ChromeOptions();
-            var chromeDriver = testConfig?.ChromeDriver;
+        private IWebDriver CreateDriver() => new ChromeDriver(BuildChromeOptions(_browserConfig));
 
-            if (chromeDriver is not null) {
-                foreach (var preference in chromeDriver.UserProfilePreferences) {
+        private static ChromeOptions BuildChromeOptions(SeleniumBrowserConfig? browser) {
+            var options = new ChromeOptions();
+
+            if (browser is not null) {
+                foreach (var preference in browser.UserProfilePreferences) {
                     if (string.IsNullOrWhiteSpace(preference.Key)) {
                         continue;
                     }
@@ -397,7 +401,7 @@ namespace Selenium_Handler.Handler.Implementation {
                     options.AddUserProfilePreference(preference.Key, preferenceValue);
                 }
 
-                foreach (var argument in chromeDriver.Arguments) {
+                foreach (var argument in browser.Arguments) {
                     if (string.IsNullOrWhiteSpace(argument)) {
                         continue;
                     }
@@ -406,7 +410,7 @@ namespace Selenium_Handler.Handler.Implementation {
                 }
             }
 
-            return new ChromeDriver(options);
+            return options;
         }
 
         private static object? NormalizeChromeOptionValue(object? value) {
@@ -431,7 +435,7 @@ namespace Selenium_Handler.Handler.Implementation {
                 return;
             }
 
-            _driver = CreateDriver(_currentConfig);
+            _driver = CreateDriver();
         }
 
 

@@ -10,6 +10,7 @@ namespace Selenium_Handler.Config {
 
             Directory.CreateDirectory(basePath);
             Directory.CreateDirectory(ResolvePath(basePath, folderPaths.FileConfigFolder));
+            Directory.CreateDirectory(Path.Combine(ResolvePath(basePath, folderPaths.FileConfigFolder), "TestConfig"));
             Directory.CreateDirectory(ResolvePath(basePath, folderPaths.ScriptFolder));
             Directory.CreateDirectory(ResolvePath(basePath, folderPaths.ScreenshotFolder));
             Directory.CreateDirectory(ResolvePath(basePath, folderPaths.LogFolder));

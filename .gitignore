@@ -12,15 +12,5 @@ obj/
 .DS_Store
 Thumbs.db
 
-# Local screenshots/results can be large and machine-specific
-Selenium Handler/Scripts/Screenshots/
-Selenium Handler/Scripts/Results/
-
-# Keep script/config folders in Git, but keep their contents local.
-/Selenium Handler/Scripts/FileConfig/*
-!/Selenium Handler/Scripts/FileConfig/.gitkeep
-!/Selenium Handler/Scripts/FileConfig/TestConfig/
-/Selenium Handler/Scripts/FileConfig/TestConfig/**
-!/Selenium Handler/Scripts/FileConfig/TestConfig/.gitkeep
-/Selenium Handler/Scripts/SeleniumScripts/**
-!/Selenium Handler/Scripts/SeleniumScripts/.gitkeep
+# Local scripts, configs, logs, screenshots, and other runtime files
+/Selenium Handler/Scripts/

@@ -18,7 +18,7 @@ Scripts/
     Example_VerifyPage.cs              # Assertions
 ```
 
-The contents of these three folders are ignored by Git, except for their `.gitkeep` files. Create your configs and scripts locally. Keep documentation outside these folders so Git can track it.
+The entire `Scripts` folder is ignored by Git. At application startup, the folder initializer creates `Scripts`, `FileConfig`, `FileConfig/TestConfig`, `SeleniumScripts`, `Screenshots`, and `Logs`, using the configured paths. It creates directories only; create your configs and scripts locally. Keep documentation outside `Scripts` so Git can track it.
 
 The folder paths come from the `Scripts` section in `appsettings.json`:
 
@@ -48,6 +48,13 @@ Save this as `Scripts/FileConfig/ExampleSuite.json`:
   "params": {
     "expectedTitle": "Example Domain"
   },
+  "browser": {
+    "arguments": ["--start-maximized"],
+    "userProfilePreferences": {
+      "credentials_enable_service": false,
+      "profile.password_manager_enabled": false
+    }
+  },
   "tests": [
     {
       "testConfig": "TestConfig/Example_OpenPage.json"
@@ -66,6 +73,7 @@ Save this as `Scripts/FileConfig/ExampleSuite.json`:
 | `name` | Suite display name. |
 | `description` | Optional description. |
 | `params` | Optional shared starting values. Values must be JSON strings. |
+| `browser` | Optional browser launch arguments and profile preferences for the entire parent suite. All its child tests share these settings. |
 | `tests` | Ordered list of child tests. A parent suite needs at least one entry. |
 | `tests[].testConfig` | Path to a child TestConfig. Relative paths resolve beside the parent FileConfig first, then under `FileConfigFolder`. |
 | `tests[].dependency` | Optional **name of an earlier child test**, taken from that child's `name` field. This is not its filename. |
@@ -89,13 +97,6 @@ Save this as `Scripts/FileConfig/TestConfig/Example_OpenPage.json`:
       "seleniumScript": "Example_OpenPage.cs"
     }
   ],
-  "chromeDriver": {
-    "arguments": ["--start-maximized"],
-    "userProfilePreferences": {
-      "credentials_enable_service": false,
-      "profile.password_manager_enabled": false
-    }
-  },
   "scriptOptions": {
     "references": ["object", "Enumerable", "IWebDriver", "WebDriverWait", "TestConfig"],
     "imports": [
@@ -170,6 +171,10 @@ Supported reference aliases include `object`, `Enumerable`, `IWebDriver`, `Chrom
 
 These lists do not install NuGet packages. Add required packages to the host application separately, then make the relevant assemblies available to the script. Dependencies are declared per child test; the parent FileConfig has no `scriptOptions` setting.
 
+The browser-neutral setting name is `browser`, but the current runner still launches Chrome. Renaming this setting does not add Edge or Firefox support.
+
+Each child can have different references and imports. Roslyn applies that child's `scriptOptions` when compiling its steps, even though all children share one browser. Put `browser` only in the parent FileConfig; child `browser` fields are not used. To use different browser launch settings, put the tests in separate parent FileConfigs.
+
 ## 5. Write the Selenium scripts
 
 Save this as `Scripts/SeleniumScripts/Example_OpenPage.cs`:
@@ -211,7 +216,7 @@ Scripts access the actual Selenium `IWebDriver`, so they can use its full API, i
 | Object | Available data |
 | --- | --- |
 | `Driver` | Shared Selenium `IWebDriver`. |
-| `Configuration` | Current TestConfig, including `Api`, `Params`, and driver/script settings. |
+| `Configuration` | Current TestConfig, including `Api`, `Params`, and script settings. Browser launch settings belong to the parent FileConfig. |
 | `Step` | Current step's name, description, dependency, and script path. |
 | `Logger` | Application logger. Logging extension methods may require their namespace and assembly references. |
 | `RuntimeParams` | Mutable shared dictionary of parent params, child params, and script-produced values. |
@@ -253,7 +258,7 @@ Create `MyUi.csx` beside that script. A helper file contains shared methods or t
 ## 6. Shared values, browser lifetime, and screenshots
 
 - Parent params load first. Each child's params then load when that child begins, overwriting shared keys with the same name. Avoid putting a placeholder `caseSn` in later child params if it would overwrite the real returned value.
-- Child tests in one parent FileConfig share the browser and runtime dictionary. The first child that creates the browser determines its Chrome options; later child driver settings do not recreate an existing browser.
+- Child tests in one parent FileConfig share the browser and runtime dictionary. The parent FileConfig determines Chrome arguments and profile preferences before the first child launches the browser. Child tests keep their own script references and imports.
 - Before and after each parent FileConfig, the service resets the session: it clears runtime values and current test/step references, then quits and disposes the browser. A final reset also runs when the service run exits. Cleanup is attempted through `finally` blocks on failure.
 - Saved history and screenshot files remain after session cleanup.
 - The runner attempts a screenshot immediately after each script succeeds or fails. Scripts should wait for the expected UI state before returning. A pause alone does not guarantee that loading has completed.
@@ -286,6 +291,6 @@ The runner accepts the parent config name with or without `.json`, or its absolu
 | Dependency error | Reference an earlier test's `name` or earlier step's `name`, rather than a filename. |
 | Compilation or namespace error | Check `scriptOptions.references`, `imports`, and any `#load` paths. |
 | Missing runtime value | Verify that the producing script ran successfully and a later child's params did not overwrite it. |
-| Browser settings seem unchanged | Chrome options apply when the shared browser is first created. |
+| Browser settings seem unchanged | Put `browser` in the parent FileConfig. Its options apply when the shared browser is first created; rerun the parent after changing them. |
 | Screenshot captures loading UI | Add an explicit wait for the final UI state before the script returns. |
-| New configs/scripts do not appear in Git status | Their contents are intentionally ignored; only folder placeholders are tracked. |
+| New configs/scripts do not appear in Git status | The entire `Scripts` folder is intentionally ignored. Startup creates the working directories. |
